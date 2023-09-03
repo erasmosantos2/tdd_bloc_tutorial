@@ -78,4 +78,36 @@ void main() {
           verifyNoMoreInteractions(createUSer);
         });
   });
+
+  group('getUsers', () {
+    blocTest<AuthenticationCubit, AuthenticationState>(
+        'Should  emit [GettingUsers, UsersLoaded] when successful',
+        build: () {
+          when(() => getUsers()).thenAnswer((_) async => const Right([]));
+          return cubit;
+        },
+        act: (cubit) => cubit.getUsers(),
+        expect: () => [const GettingUsers(), const UsersLoaded([])],
+        verify: (_) {
+          verify(() => getUsers()).called(1);
+          verifyNoMoreInteractions(getUsers);
+        });
+
+    blocTest(
+        'Should emit [GettingUsers, AuthenticationError] when unsuccessful',
+        build: () {
+          when((() => getUsers()))
+              .thenAnswer((_) async => const Left(tAPIFailure));
+          return cubit;
+        },
+        act: (cubit) => cubit.getUsers(),
+        expect: () => [
+              const GettingUsers(),
+              AuthenticationError(tAPIFailure.errorMessage)
+            ],
+        verify: (_) {
+          verify(() => getUsers()).called(1);
+          verifyNoMoreInteractions(getUsers);
+        });
+  });
 }
