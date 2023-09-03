@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tdd_bloc_tutorial/core/errors/failure.dart';
 import 'package:tdd_bloc_tutorial/src/authentication/domain/usecases/create_user.dart';
 import 'package:tdd_bloc_tutorial/src/authentication/domain/usecases/get_users.dart';
 import 'package:tdd_bloc_tutorial/src/authentication/presentation/bloc/authentication_state.dart';
@@ -17,6 +18,7 @@ void main() {
   late AuthenticationCubit cubit;
 
   const tCreateUserParams = CreateUserParams.empty();
+  const tAPIFailure = APIFailure(message: 'message', statusCode: 400);
 
   setUp(() {
     getUsers = MockGetUsers();
@@ -55,5 +57,25 @@ void main() {
         verifyNoMoreInteractions(createUSer);
       },
     );
+
+    blocTest<AuthenticationCubit, AuthenticationState>(
+        'Should emit [CreatingUser, AuthenticationError when unsuccessful]',
+        build: () {
+          when(() => createUSer(any()))
+              .thenAnswer((_) async => const Left(tAPIFailure));
+          return cubit;
+        },
+        act: (cubit) => cubit.createUser(
+            createdAt: tCreateUserParams.createdAt,
+            name: tCreateUserParams.name,
+            avatar: tCreateUserParams.avatar),
+        expect: () => [
+              const CreatingUser(),
+              AuthenticationError(tAPIFailure.errorMessage)
+            ],
+        verify: (_) {
+          verify(() => createUSer(tCreateUserParams)).called(1);
+          verifyNoMoreInteractions(createUSer);
+        });
   });
 }
