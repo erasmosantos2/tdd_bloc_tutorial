@@ -17,7 +17,7 @@ abstract class AuthenticationRemoteDatasource {
 }
 
 const kCreateUserEndPoint = '/test-tdd-api/users';
-const kGetEndPoint = '/test-tdd-api/user';
+const kGetEndPoint = '/test-tdd-api/users';
 
 class AuthenticationRemoteDataSrcImpl
     implements AuthenticationRemoteDatasource {
@@ -37,7 +37,8 @@ class AuthenticationRemoteDataSrcImpl
                 'createdAt': createdAt,
                 'name': name,
                 avatar: avatar,
-              }));
+              }),
+              headers: {'Content-Type': 'application/json'});
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw APIException(

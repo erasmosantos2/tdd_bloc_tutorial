@@ -26,8 +26,10 @@ void main() {
     test('Should complete successfully when the status code is 200 or 201',
         () async {
       // Arrange
-      when(() => client.post(any(), body: any(named: 'body'))).thenAnswer(
-          (_) async => http.Response('User created successfully', 201));
+      when(() => client.post(any(),
+              body: any(named: 'body'), headers: any(named: 'headers')))
+          .thenAnswer(
+              (_) async => http.Response('User created successfully', 201));
       // Act
       final methodCall = remoteDatasource.createUser;
       // Asset
@@ -43,7 +45,8 @@ void main() {
             'createdAt': 'createdAt',
             'name': 'name',
             'avatar': 'avatar',
-          }))).called(1);
+          }),
+          headers: {'Content-Type': 'application/json'})).called(1);
       verifyNoMoreInteractions(client);
     });
 
@@ -51,7 +54,8 @@ void main() {
         () async {
       // Arrange
       when(
-        () => client.post(any(), body: any(named: 'body')),
+        () => client.post(any(),
+            body: any(named: 'body'), headers: any(named: 'headers')),
       ).thenAnswer((_) async => http.Response('Invalid email address', 400));
       // Act
       final methodCall = remoteDatasource.createUser;
@@ -66,7 +70,8 @@ void main() {
             'createdAt': 'createdAt',
             'name': 'name',
             'avatar': 'avatar',
-          }))).called(1);
+          }),
+          headers: {'Content-Type': 'application/json'})).called(1);
       verifyNoMoreInteractions(client);
     });
   });
